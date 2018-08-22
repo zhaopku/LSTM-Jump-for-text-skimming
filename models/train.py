@@ -119,7 +119,6 @@ class Train:
 
 		# init hard gates
 		self.init_hard_gates(self.args.threshold, self.args.percent)
-		exit(0)
 		sessConfig = tf.ConfigProto(allow_soft_placement=True)
 		sessConfig.gpu_options.allow_growth = True
 
