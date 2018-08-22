@@ -191,19 +191,19 @@ class Train:
 			all_skip_rate = []
 			all_correct_predicted_inference_skips = []
 			total_valids = 0
+			if e == self.args.transferEpochs + 1:
+				print('RL begins!')
+				out.write('RL begins\n')
+
 			for idx, nextBatch in enumerate(tqdm(trainBatches)):
 				cnt += 1
 				#nextBatch = trainBatches[227]
 				self.globalStep += 1
 
 				total_samples += nextBatch.batch_size
-				if e == self.args.transferEpochs+1 and idx == 0:
-					print('RL begins!')
-					out.write('RL begins\n')
+				if e > self.args.transferEpochs+1:
 					ops, feed_dict, length = self.model.step(nextBatch, test=False, is_transfering=False)
-				elif e == 0 and idx == 0:
-					print('Now in supervised mode!')
-					out.write('Now in supervised mode!\n')
+				else:
 					# only transfer at first xxx epochs
 					ops, feed_dict, length = self.model.step(nextBatch, test=False, is_transfering=True)
 				# skip_rate: batch_size * n_samples
