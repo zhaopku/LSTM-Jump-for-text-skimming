@@ -197,11 +197,11 @@ class Train:
 				self.globalStep += 1
 
 				total_samples += nextBatch.batch_size
-				if e > self.args.transferEpochs:
+				if e == self.args.transferEpochs+1:
 					print('RL begins!')
 					out.write('RL begins\n')
 					ops, feed_dict, length = self.model.step(nextBatch, test=False, is_transfering=False)
-				else:
+				elif e == 0:
 					print('Now in supervised mode!')
 					out.write('Now in supervised mode!\n')
 					# only transfer at first xxx epochs
