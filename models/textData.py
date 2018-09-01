@@ -30,7 +30,9 @@ class TextData:
 
 		self.train_samples, self.valid_samples, self.test_samples = self._create_data()
 
-		self.read_gates()
+		self.read_gates(file_name=self.args.gatesFileTrain, tag='train')
+		self.read_gates(file_name=self.args.gatesFileVal, tag='val')
+		self.read_gates(file_name=self.args.gatesFileTest, tag='test')
 
 		# [num_batch, batch_size, maxStep]
 		self.train_batches = self._create_batch(self.train_samples)
@@ -39,25 +41,33 @@ class TextData:
 		# note: test_batches is none here
 		self.test_batches = self._create_batch(self.test_samples)
 
-	def read_gates(self):
+	def read_gates(self, file_name, tag='train'):
 		print('Reading lines!')
-		with open(os.path.join(self.args.dataDir, self.args.dataset, self.args.gatesFile), 'r') as csvfile:
+		with open(os.path.join(self.args.dataDir, self.args.dataset, file_name), 'r') as csvfile:
 			reader = csv.reader(csvfile)
 			sample_cnt = 0
 			for idx, row in enumerate(reader):
 				if idx % 2 == 0:
 					sentence = ' '.join(row)[:-1]
 					sentence = sentence.strip()
-
-					train_sample_sentence = ' '.join(self.train_samples[sample_cnt].sentence[:self.train_samples[sample_cnt].length])
+					if tag == 'train':
+						train_sample_sentence = ' '.join(self.train_samples[sample_cnt].sentence[:self.train_samples[sample_cnt].length])
+					elif tag == 'val':
+						train_sample_sentence = ' '.join(self.valid_samples[sample_cnt].sentence[:self.valid_samples[sample_cnt].length])
+					else:
+						train_sample_sentence = ' '.join(self.test_samples[sample_cnt].sentence[:self.test_samples[sample_cnt].length])
 
 					assert sentence == train_sample_sentence
 				else:
 					gates = [float(s) for s in row]
-					self.train_samples[sample_cnt].init_gates(gates)
+					if tag == 'train':
+						self.train_samples[sample_cnt].init_gates(gates)
+					elif tag == 'val':
+						self.valid_samples[sample_cnt].init_gates(gates)
+					else:
+						self.test_samples[sample_cnt].init_gates(gates)
+
 					sample_cnt += 1
-
-
 
 	def getVocabularySize(self):
 		assert len(self.word2id) == len(self.id2word)

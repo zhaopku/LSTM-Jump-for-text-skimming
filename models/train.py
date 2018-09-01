@@ -48,8 +48,9 @@ class Train:
 		dataArgs.add_argument('--testFile', type=str, default='test.txt')
 		dataArgs.add_argument('--embeddingFile', type=str, default='glove.840B.300d.txt')
 		dataArgs.add_argument('--vocabSize', type=int, default=-1, help='vocab size, use the most frequent words')
-		dataArgs.add_argument('--gatesFile', type=str, default='gates_next.csv')
-
+		dataArgs.add_argument('--gatesFileTrain', type=str, default='gates_train_')
+		dataArgs.add_argument('--gatesFileVal', type=str, default='gates_val_')
+		dataArgs.add_argument('--gatesFileTest', type=str, default='gates_test_')
 		# neural network options
 		nnArgs = parser.add_argument_group('Network options')
 		nnArgs.add_argument('--embeddingSize', type=int, default=300)
@@ -70,7 +71,7 @@ class Train:
 		trainingArgs.add_argument('--maxSkip', type=int, default=5, help='maximum of jumping steps in a jump')
 		trainingArgs.add_argument('--maxJump', type=int, default=-1, help='maximum number of jumps in a sequence, -1 indicates we are not using acl style')
 		trainingArgs.add_argument('--discount', type=float, default=0.99)
-		trainingArgs.add_argument('--epochs', type=int, default=500, help='most training epochs')
+		trainingArgs.add_argument('--epochs', type=int, default=300, help='most training epochs')
 		trainingArgs.add_argument('--device', type=str, default='/gpu:0', help='use the first GPU as default')
 		trainingArgs.add_argument('--loadModel', action='store_true', help='whether or not to use old models')
 		trainingArgs.add_argument('--testModel', action='store_true')
@@ -81,8 +82,20 @@ class Train:
 		trainingArgs.add_argument('--sparse', type=float, default=10.0, help='coefficient for sparse penalty')
 		trainingArgs.add_argument('--percent', action='store_true', help='whether or not use percentage for hardgate init')
 		trainingArgs.add_argument('--threshold', type=float, default=0.5, help='for hardgate init')
-		trainingArgs.add_argument('--transferEpochs', type=int, default=300, help='number of epochs for transfering')
+		trainingArgs.add_argument('--transferEpochs', type=int, default=150, help='number of epochs for transfering')
+		trainingArgs.add_argument('--next', action='store_true', help='style of predicting gates')
+		trainingArgs.add_argument('--all', action='store_true', help='whether or not to transfer for val&test')
 		return parser.parse_args(args)
+
+	def process_gates_files(self):
+		if self.args.next:
+			self.args.gatesFileTrain = self.args.gatesFileTrain + 'next.csv'
+			self.args.gatesFileVal = self.args.gatesFileVal + 'next.csv'
+			self.args.gatesFileTest = self.args.gatesFileTest + 'next.csv'
+		else:
+			self.args.gatesFileTrain = self.args.gatesFileTrain + 'current.csv'
+			self.args.gatesFileVal = self.args.gatesFileVal + 'current.csv'
+			self.args.gatesFileTest = self.args.gatesFileTest + 'current.csv'
 
 	def main(self, args=None):
 		print('TensorFlow version {}'.format(tf.VERSION))
@@ -90,12 +103,18 @@ class Train:
 		# initialize args
 		self.args = self.parse_args(args)
 
+		self.process_gates_files()
+
 		self.resultDir = os.path.join(self.args.resultDir, self.args.dataset)
 		self.summaryDir = os.path.join(self.args.summaryDir, self.args.dataset)
 		self.dataDir = os.path.join(self.args.dataDir, self.args.dataset)
 
 		self.outFile = utils.constructFileName(self.args, prefix=self.resultDir)
 		self.args.datasetName = utils.constructFileName(self.args, prefix=self.args.dataset, createDataSetName=True)
+		if self.args.next:
+			self.args.datasetName = 'next_' + self.args.datasetName
+		else:
+			self.args.datasetName = 'current_' + self.args.datasetName
 		datasetFileName = os.path.join(self.dataDir, self.args.datasetName)
 
 		if not os.path.exists(self.resultDir):
@@ -260,9 +279,9 @@ class Train:
 				else:
 					print('New valAcc2 {} at epoch {}'.format(valAcc, e))
 					out.write('New valAcc2 {} at epoch {}\n'.format(valAcc, e))
-				save_path = self.saver.save(sess, save_path=self.model_name)
-				print('model saved at {}'.format(save_path))
-				out.write('model saved at {}\n'.format(save_path))
+				# save_path = self.saver.save(sess, save_path=self.model_name)
+				# print('model saved at {}'.format(save_path))
+				# out.write('model saved at {}\n'.format(save_path))
 
 			out.flush()
 		out.close()
@@ -289,7 +308,11 @@ class Train:
 			cnt += 1
 
 			total_samples += nextBatch.batch_size
-			ops, feed_dict, length = self.model.step(nextBatch, test=True)
+			if self.args.all:
+				is_transfering = True
+			else:
+				is_transfering = False
+			ops, feed_dict, length = self.model.step(nextBatch, test=True, is_transfering=is_transfering)
 
 			loss, predictions, corrects, skip_rate, correct_predicted_inference_skips, n_valids_sum = sess.run(ops, feed_dict)
 			all_correct_predicted_inference_skips.extend(correct_predicted_inference_skips.tolist())

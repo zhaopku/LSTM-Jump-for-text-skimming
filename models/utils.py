@@ -289,9 +289,9 @@ def constructFileName(args, prefix=None, tag=None, createDataSetName=False):
 		return file_name
 
 	file_name = ''
-	file_name += 'embeddingSize_' + str(args.embeddingSize)
-	file_name += '_hiddenSize_' + str(args.hiddenSize)
-	file_name += '_maxSteps_' + str(args.maxSteps)
+	#file_name += 'embeddingSize_' + str(args.embeddingSize)
+	file_name += 'hiddenSize_' + str(args.hiddenSize)
+	#file_name += '_maxSteps_' + str(args.maxSteps)
 	file_name += '_dropOut_' + str(args.dropOut)
 
 	file_name += '_learningRate_' + str(args.learningRate)
@@ -307,6 +307,8 @@ def constructFileName(args, prefix=None, tag=None, createDataSetName=False):
 	file_name += '_te_' + str(args.transferEpochs)
 	file_name += '_percent_' + str(args.percent)
 	file_name += '_threshold_' + str(args.threshold)
+	file_name += '_all_' + str(args.all)
+	file_name += '_next_' + str(args.next)
 	if tag != 'model':
 		file_name += '_loadModel_' + str(args.loadModel)
 
@@ -340,4 +342,5 @@ def writeInfo(out, args):
 	out.write('percent {}\n'.format(args.percent))
 	out.write('threshold {}\n'.format(args.threshold))
 	out.write('transferEpochs {}\n'.format(args.transferEpochs))
-
+	out.write('next {}\n'.format(args.next))
+	out.write('all {}\n'.format(args.all))

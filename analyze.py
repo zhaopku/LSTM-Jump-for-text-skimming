@@ -80,18 +80,18 @@ def process(f):
 			splits = line.split()
 			if line.startswith('epoch ='):
 				result.train_acc = float(splits[8][:-1])
-				result.train_skip = float(splits[11])
+				result.train_skip = float(splits[11][:-1])
 				result.cur_epoch = int(splits[2][:-1])
 				continue
 			elif line.startswith('\tVal'):
 				result.val_acc = float(splits[6][:-1])
-				result.val_skip = float(splits[9])
+				result.val_skip = float(splits[9][:-1])
 				continue
 			elif line.startswith('\tTest'):
 				result.test_acc = float(splits[6][:-1])
-				result.test_skip = float(splits[9])
+				result.test_skip = float(splits[9][:-1])
 				continue
-			elif line.startswith('New valAcc'):
+			elif line.startswith('New valAcc2'):
 				result_final = copy.deepcopy(result)
 
 		return result_final
@@ -122,6 +122,8 @@ def to_pic(all_results):
 	test = []
 
 	for res in all_results:
+		if res.train_acc is None or res.train_skip is None:
+			continue
 		train.append((res.train_acc, res.train_skip))
 		val.append((res.val_acc, res.val_skip))
 		test.append((res.test_acc, res.test_skip))
