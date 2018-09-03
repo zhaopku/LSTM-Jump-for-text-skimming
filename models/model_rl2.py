@@ -176,6 +176,7 @@ class Model:
 
 			# mask out transfering_loss and pg_loss
 			is_transfering = tf.cast(self.is_transfering, tf.float32)
+			# disable transfering_loss when RL begins
 			transfering_loss = tf.multiply(is_transfering, transfering_loss)
 			pg_loss = tf.multiply((1.0-is_transfering), pg_loss)
 

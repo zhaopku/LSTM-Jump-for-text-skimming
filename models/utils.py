@@ -119,7 +119,6 @@ class SkipLSTMCell(tf.contrib.rnn.LayerRNNCell):
 		is_training = tf.cast(self.is_training, tf.int32, name='is_training')
 		predictions = tf.add(is_training * predictions_training, (1-is_training)* predictions_inference, name='predictions')
 
-
 		# [batch_size, max_skip+1]
 		probs = tf.nn.softmax(logits=logits, axis=-1)
 

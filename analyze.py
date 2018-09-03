@@ -91,7 +91,7 @@ def process(f):
 				result.test_acc = float(splits[6][:-1])
 				result.test_skip = float(splits[9][:-1])
 				continue
-			elif line.startswith('New valAcc2'):
+			elif line.startswith('New valAcc'):
 				result_final = copy.deepcopy(result)
 
 		return result_final
@@ -110,7 +110,7 @@ def my_plot(data, name='train', marker='o', color='red'):
 	plt.plot(x, y, marker='>', color='black')
 	plt.xlabel('Skip rate')
 	plt.ylabel('Acc')
-	plt.xlim((0.0, 80.0))
+	plt.xlim((0.0, 100.0))
 	plt.ylim((50.0, 100.0))
 	plt.title(name)
 	plt.plot(skip, acc, marker = marker, color = color)
@@ -132,17 +132,16 @@ def to_pic(all_results):
 	val_sorted = sorted(val, key=lambda x:x[1])
 	test_sorted = sorted(test, key=lambda x:x[1])
 
-
 	my_plot(train_sorted, 'train', 'o', 'red')
 	my_plot(val_sorted, 'val', 's', 'blue')
 	my_plot(test_sorted, 'test', '^', 'green')
 
 if __name__ == '__main__':
-	path = './result/rotten'
+	path = './result/rotten_all_true2'
 	files = os.listdir(path)
 	all_results = []
 	for f in files:
-		if not f.startswith('em'):
+		if not f.startswith('hi'):
 			continue
 		res = process(os.path.join(path, f))
 		all_results.append(res)

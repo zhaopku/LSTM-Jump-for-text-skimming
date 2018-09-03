@@ -343,8 +343,8 @@ class Train:
 
 		val_batch = self.textData.val_batches
 		for batch in val_batch:
-			batch.init_hard_gates(max_skip=self.args.maxSkip)
+			batch.init_hard_gates(threshold=threshold, percent=percent, max_skip=self.args.maxSkip)
 
 		test_batch = self.textData.test_batches
 		for batch in test_batch:
-			batch.init_hard_gates(max_skip=self.args.maxSkip)
+			batch.init_hard_gates(threshold=threshold, percent=percent, max_skip=self.args.maxSkip)
