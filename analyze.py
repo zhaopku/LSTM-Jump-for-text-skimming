@@ -137,7 +137,7 @@ def to_pic(all_results):
 	my_plot(test_sorted, 'test', '^', 'green')
 
 if __name__ == '__main__':
-	path = './result/rotten_all_true2'
+	path = './result/upper'
 	files = os.listdir(path)
 	all_results = []
 	for f in files:

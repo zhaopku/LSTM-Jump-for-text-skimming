@@ -197,7 +197,10 @@ class Model:
 
 			# add sparse_loss
 			# sparse_loss = tf.Print(sparse_loss, data=[tf.reduce_sum(sparse_loss)])
-			self.loss = tf.reduce_sum(ce_loss + pg_loss + transfering_loss, name='loss')
+
+			# when testing upper bound, we only cares about ce_loss
+			#self.loss = tf.reduce_sum(ce_loss + pg_loss + transfering_loss, name='loss')
+			self.loss = tf.reduce_sum(ce_loss, name='loss')
 
 			gradients_all = tf.gradients(self.loss, trainable_params)
 
@@ -349,9 +352,6 @@ class Model:
 			self.predicted_inference_skips = tf.argmax(predicted_logits, axis=-1, name='predicted_inference_skips', output_type=tf.int32)
 			self.correct_predicted_inference_skips = tf.cast(tf.equal(self.predicted_inference_skips, self.induced_skips), tf.float32)
 			self.correct_predicted_inference_skips = tf.multiply(self.correct_predicted_inference_skips, valid, name='correct_predicted_inference_skips')
-
-
-
 
 		self.v0 = skip_flag
 		return ce_loss, rewards, n_skips, probs, valid, n_corrects, skip_flag, transfering_loss
