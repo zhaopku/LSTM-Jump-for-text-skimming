@@ -1,0 +1,8 @@
+# JAX/Flax implementation requirements
+jax>=0.4.20
+jaxlib>=0.4.20
+flax>=0.7.5
+optax>=0.1.7
+numpy>=1.24.0
+tqdm>=4.66.0
+nltk>=3.8.0
