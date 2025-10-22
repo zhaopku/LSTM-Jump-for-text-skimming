@@ -140,8 +140,6 @@ def train_step_rl(
     Returns:
         Updated state and metrics
     """
-    batch_size = batch['input_ids'].shape[0]
-
     # Replicate batch for n_samples
     input_ids_repeated = jnp.repeat(batch['input_ids'], n_samples, axis=0)
     lengths_repeated = jnp.repeat(batch['lengths'], n_samples, axis=0)

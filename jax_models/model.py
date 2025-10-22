@@ -5,6 +5,7 @@ This implements a sequence classification model with learned skipping behavior.
 import jax
 import jax.numpy as jnp
 from flax import linen as nn
+import optax
 from typing import Tuple, Dict, Any, Optional
 from jax_models.acl_cell import ACLSkipLSTMCell, ACLLSTMState
 
@@ -224,13 +225,9 @@ class SkimTextClassifier(nn.Module):
         embedded = self.embed_inputs(input_ids, embeddings)
 
         # Apply dropout to embeddings
-        if is_training and self.dropout_rate > 0:
-            if rng is not None:
-                rng, dropout_rng = jax.random.split(rng)
-            else:
-                dropout_rng = jax.random.PRNGKey(0)
-            embedded = nn.Dropout(rate=self.dropout_rate, deterministic=False)(
-                embedded, rng=dropout_rng
+        if self.dropout_rate > 0:
+            embedded = nn.Dropout(rate=self.dropout_rate, deterministic=not is_training)(
+                embedded
             )
 
         # Process sequence
@@ -304,8 +301,6 @@ def compute_rl_loss(
         total_loss: Combined CE + PG loss
         metrics: Dictionary of metrics
     """
-    import optax
-
     # Cross-entropy loss (task loss)
     ce_loss_per_sample = optax.softmax_cross_entropy_with_integer_labels(logits, labels)
 
